@@ -1,0 +1,211 @@
+{
+  "model": "meta-llama/Llama-3.1-8B-Instruct",
+  "api_base_url": "https://router.huggingface.co/v1",
+  "tasks": {
+    "easy": {
+      "task_id": "easy",
+      "score": 0.3666666666666667,
+      "emails_processed": 3,
+      "total_reward": 1.1,
+      "details": [
+        {
+          "email_id": "easy_001",
+          "subject": "\ud83c\udf89 CONGRATULATIONS! You Won $1,000,000!!!",
+          "action": {
+            "category": "personal",
+            "priority": "medium",
+            "action_type": "archive"
+          },
+          "reward": 0.35
+        },
+        {
+          "email_id": "easy_002",
+          "subject": "Q4 Budget Review Meeting - Action Required",
+          "action": {
+            "category": "personal",
+            "priority": "medium",
+            "action_type": "archive"
+          },
+          "reward": 0.15
+        },
+        {
+          "email_id": "easy_003",
+          "subject": "Grandma's birthday next Sunday",
+          "action": {
+            "category": "personal",
+            "priority": "medium",
+            "action_type": "archive"
+          },
+          "reward": 0.6
+        }
+      ]
+    },
+    "medium": {
+      "task_id": "medium",
+      "score": 0.45999999999999996,
+      "emails_processed": 5,
+      "total_reward": 2.3,
+      "details": [
+        {
+          "email_id": "med_001",
+          "subject": "This week in AI: GPT-5 rumors, Apple's new chip",
+          "action": {
+            "category": "personal",
+            "priority": "medium",
+            "action_type": "archive"
+          },
+          "reward": 0.55
+        },
+        {
+          "email_id": "med_002",
+          "subject": "URGENT: Client meeting moved to TODAY",
+          "action": {
+            "category": "personal",
+            "priority": "medium",
+            "action_type": "archive"
+          },
+          "reward": 0.2
+        },
+        {
+          "email_id": "med_003",
+          "subject": "Your order has shipped!",
+          "action": {
+            "category": "personal",
+            "priority": "medium",
+            "action_type": "archive"
+          },
+          "reward": 0.8499999999999999
+        },
+        {
+          "email_id": "med_004",
+          "subject": "Benefits enrollment deadline reminder",
+          "action": {
+            "category": "personal",
+            "priority": "medium",
+            "action_type": "archive"
+          },
+          "reward": 0.35
+        },
+        {
+          "email_id": "med_005",
+          "subject": "Business Proposal - Confidential",
+          "action": {
+            "category": "personal",
+            "priority": "medium",
+            "action_type": "archive"
+          },
+          "reward": 0.35
+        }
+      ]
+    },
+    "hard": {
+      "task_id": "hard",
+      "score": 0.34,
+      "emails_processed": 10,
+      "total_reward": 3.4000000000000004,
+      "details": [
+        {
+          "email_id": "hard_001",
+          "subject": "Unusual activity detected on your account",
+          "action": {
+            "category": "personal",
+            "priority": "medium",
+            "action_type": "archive"
+          },
+          "reward": 0.35
+        },
+        {
+          "email_id": "hard_002",
+          "subject": "RE: RE: RE: Contract renewal discussion",
+          "action": {
+            "category": "personal",
+            "priority": "medium",
+            "action_type": "archive"
+          },
+          "reward": 0.0
+        },
+        {
+          "email_id": "hard_003",
+          "subject": "You have 15 new connection requests",
+          "action": {
+            "category": "personal",
+            "priority": "medium",
+            "action_type": "archive"
+          },
+          "reward": 0.55
+        },
+        {
+          "email_id": "hard_004",
+          "subject": "Fwd: Customer complaint - needs immediate attentio",
+          "action": {
+            "category": "personal",
+            "priority": "medium",
+            "action_type": "archive"
+          },
+          "reward": 0.0
+        },
+        {
+          "email_id": "hard_005",
+          "subject": "Long time no talk",
+          "action": {
+            "category": "personal",
+            "priority": "medium",
+            "action_type": "archive"
+          },
+          "reward": 0.6
+        },
+        {
+          "email_id": "hard_006",
+          "subject": "Mandatory: Password reset required",
+          "action": {
+            "category": "personal",
+            "priority": "medium",
+            "action_type": "archive"
+          },
+          "reward": 0.35
+        },
+        {
+          "email_id": "hard_007",
+          "subject": "Flash Sale: 70% off everything!",
+          "action": {
+            "category": "personal",
+            "priority": "medium",
+            "action_type": "archive"
+          },
+          "reward": 0.35
+        },
+        {
+          "email_id": "hard_008",
+          "subject": "Private: Your performance review",
+          "action": {
+            "category": "personal",
+            "priority": "medium",
+            "action_type": "archive"
+          },
+          "reward": 0.15
+        },
+        {
+          "email_id": "hard_009",
+          "subject": "Fraud Alert: Suspicious transaction",
+          "action": {
+            "category": "personal",
+            "priority": "medium",
+            "action_type": "archive"
+          },
+          "reward": 0.2
+        },
+        {
+          "email_id": "hard_010",
+          "subject": "Thank you for your donation",
+          "action": {
+            "category": "personal",
+            "priority": "medium",
+            "action_type": "archive"
+          },
+          "reward": 0.8499999999999999
+        }
+      ]
+    }
+  },
+  "overall_score": 0.3888888888888889
+}

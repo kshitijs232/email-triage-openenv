@@ -1,0 +1,45 @@
+# Email Triage Environment Configuration
+# OpenEnv Spec Version 1
+spec_version: 1
+name: email_triage_env
+type: space
+runtime: fastapi
+app: server.app:app
+port: 8000
+
+# Metadata
+version: "0.1.0"
+description: "Real-world email triage environment for training AI agents to manage inboxes - classify emails, prioritize, and take appropriate actions"
+action: EmailTriageAction
+observation: EmailTriageObservation
+
+# Author info
+author:
+  name: Kshitij Srivastava
+  email: kshitijs232@gmail.com
+
+# Available tasks with graders (required: minimum 3)
+tasks:
+  - id: easy
+    description: "3 emails with clear categories - obvious spam, work meeting, personal message"
+    difficulty: easy
+    grader: "score = total_reward / num_emails"  # Returns 0.0-1.0
+    
+  - id: medium
+    description: "5 emails with priority ambiguity - newsletters vs urgent, phishing attempts"
+    difficulty: medium
+    grader: "score = total_reward / num_emails"
+    
+  - id: hard
+    description: "10 emails with complex scenarios - subtle phishing, forwarded chains, context-dependent urgency"
+    difficulty: hard
+    grader: "score = total_reward / num_emails"
+
+# HuggingFace Space deployment
+hf_space:
+  sdk: docker
+  tags:
+    - openenv
+    - email
+    - nlp
+    - rl-environment

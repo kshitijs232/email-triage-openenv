@@ -1,0 +1,12 @@
+# Core server dependencies
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+pydantic>=2.0.0
+httpx>=0.24.0
+websockets>=12.0
+
+# For inference script (LLM client)
+openai>=1.0.0
+
+# OpenEnv core (will be installed separately in Docker)
+# openenv-core
