@@ -8,5 +8,5 @@ websockets>=12.0
 # For inference script (LLM client)
 openai>=1.0.0
 
-# OpenEnv core from GitHub
-git+https://github.com/facebookresearch/OpenEnv.git
+# OpenEnv core framework
+openenv-core
