@@ -22,6 +22,10 @@ import sys
 import json
 import asyncio
 import textwrap
+import subprocess
+import time
+import signal
+import atexit
 from typing import Optional
 
 import httpx
@@ -49,12 +53,56 @@ MODEL_NAME = os.getenv("MODEL_NAME") or "meta-llama/Llama-3.1-8B-Instruct"
 
 # Environment configuration
 ENV_URL = os.getenv("ENV_URL") or "http://localhost:8000"
+ENV_PORT = int(os.getenv("ENV_PORT") or "8000")
 MAX_STEPS_PER_TASK = 20
 TEMPERATURE = 0.1
 MAX_TOKENS = 500
 
 # Tasks to evaluate
 TASKS = ["easy", "medium", "hard"]
+
+# Global server process handle
+_server_process: subprocess.Popen | None = None
+
+
+def start_server() -> subprocess.Popen:
+    """Start the environment server as a subprocess."""
+    global _server_process
+    print(f"  Starting server on port {ENV_PORT}...")
+    
+    # Get the directory of this script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    _server_process = subprocess.Popen(
+        [
+            sys.executable, "-m", "uvicorn",
+            "server.app:app",
+            "--host", "0.0.0.0",
+            "--port", str(ENV_PORT),
+        ],
+        cwd=script_dir,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        env={**os.environ, "PYTHONPATH": script_dir},
+    )
+    
+    # Register cleanup
+    atexit.register(stop_server)
+    
+    return _server_process
+
+
+def stop_server() -> None:
+    """Stop the server subprocess if running."""
+    global _server_process
+    if _server_process is not None:
+        print("  Stopping server...")
+        _server_process.terminate()
+        try:
+            _server_process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            _server_process.kill()
+        _server_process = None
 
 
 # =============================================================================
@@ -273,9 +321,9 @@ async def evaluate_task(client: OpenAI, env: EmailTriageEnv, task_id: str) -> di
     }
 
 
-async def wait_for_server(env_url: str, max_retries: int = 10, delay: float = 2.0) -> None:
+async def wait_for_server(env_url: str, max_retries: int = 15, delay: float = 2.0) -> None:
     """
-    Wait for the environment server to be ready.
+    Wait for the environment server to be ready, starting it if needed.
     
     Args:
         env_url: URL of the environment server
@@ -287,6 +335,7 @@ async def wait_for_server(env_url: str, max_retries: int = 10, delay: float = 2.
     """
     health_url = f"{env_url.rstrip('/')}/health"
     last_error = None
+    server_started = False
     
     async with httpx.AsyncClient(timeout=10.0) as client:
         for attempt in range(1, max_retries + 1):
@@ -294,12 +343,21 @@ async def wait_for_server(env_url: str, max_retries: int = 10, delay: float = 2.
                 print(f"  Checking server health (attempt {attempt}/{max_retries})...")
                 response = await client.get(health_url)
                 if response.status_code == 200:
-                    print(f"  Server is ready!")
+                    print("  Server is ready!")
                     return
                 else:
                     last_error = f"Health check returned status {response.status_code}"
             except httpx.ConnectError as e:
                 last_error = f"Connection refused: {e}"
+                # If first few attempts fail, try starting the server ourselves
+                if attempt == 2 and not server_started:
+                    print("  Server not reachable. Attempting to start server...")
+                    try:
+                        start_server()
+                        server_started = True
+                        print("  Server process started. Waiting for it to be ready...")
+                    except Exception as start_err:
+                        print(f"  Failed to start server: {start_err}")
             except httpx.TimeoutException as e:
                 last_error = f"Connection timeout: {e}"
             except Exception as e:
