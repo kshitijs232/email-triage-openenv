@@ -24,6 +24,7 @@ import asyncio
 import textwrap
 from typing import Optional
 
+import httpx
 from openai import OpenAI
 
 # Add parent path for imports when running from project root
@@ -272,6 +273,49 @@ async def evaluate_task(client: OpenAI, env: EmailTriageEnv, task_id: str) -> di
     }
 
 
+async def wait_for_server(env_url: str, max_retries: int = 10, delay: float = 2.0) -> None:
+    """
+    Wait for the environment server to be ready.
+    
+    Args:
+        env_url: URL of the environment server
+        max_retries: Maximum number of health check attempts
+        delay: Delay between retries in seconds
+        
+    Raises:
+        ConnectionError: If server is not ready after all retries
+    """
+    health_url = f"{env_url.rstrip('/')}/health"
+    last_error = None
+    
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        for attempt in range(1, max_retries + 1):
+            try:
+                print(f"  Checking server health (attempt {attempt}/{max_retries})...")
+                response = await client.get(health_url)
+                if response.status_code == 200:
+                    print(f"  Server is ready!")
+                    return
+                else:
+                    last_error = f"Health check returned status {response.status_code}"
+            except httpx.ConnectError as e:
+                last_error = f"Connection refused: {e}"
+            except httpx.TimeoutException as e:
+                last_error = f"Connection timeout: {e}"
+            except Exception as e:
+                last_error = f"Unexpected error: {e}"
+            
+            print(f"  Attempt {attempt} failed: {last_error}")
+            if attempt < max_retries:
+                print(f"  Retrying in {delay} seconds...")
+                await asyncio.sleep(delay)
+    
+    raise ConnectionError(
+        f"Environment server at {env_url} is not ready after {max_retries} attempts. "
+        f"Last error: {last_error}"
+    )
+
+
 async def run_evaluation() -> dict:
     """
     Run evaluation on all tasks and return results.
@@ -298,6 +342,10 @@ async def run_evaluation() -> dict:
         "tasks": {},
         "overall_score": 0.0,
     }
+    
+    # Wait for environment server to be ready
+    print("\nWaiting for environment server...")
+    await wait_for_server(ENV_URL)
     
     # Run evaluation for each task
     async with EmailTriageEnv(ENV_URL) as env:
