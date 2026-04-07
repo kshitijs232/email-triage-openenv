@@ -345,13 +345,52 @@ async def run_evaluation() -> dict:
     
     # Wait for environment server to be ready
     print("\nWaiting for environment server...")
-    await wait_for_server(ENV_URL)
+    try:
+        await wait_for_server(ENV_URL)
+    except ConnectionError as e:
+        print(f"ERROR: Could not connect to environment server: {e}")
+        # Return empty results with 0 score
+        for task_id in TASKS:
+            results["tasks"][task_id] = {
+                "task_id": task_id,
+                "score": 0.0,
+                "emails_processed": 0,
+                "total_reward": 0.0,
+                "details": [],
+                "error": str(e),
+            }
+        return results
     
     # Run evaluation for each task
-    async with EmailTriageEnv(ENV_URL) as env:
+    try:
+        async with EmailTriageEnv(ENV_URL) as env:
+            for task_id in TASKS:
+                try:
+                    task_result = await evaluate_task(client, env, task_id)
+                    results["tasks"][task_id] = task_result
+                except Exception as e:
+                    print(f"ERROR: Task {task_id} failed: {e}")
+                    results["tasks"][task_id] = {
+                        "task_id": task_id,
+                        "score": 0.0,
+                        "emails_processed": 0,
+                        "total_reward": 0.0,
+                        "details": [],
+                        "error": str(e),
+                    }
+    except Exception as e:
+        print(f"ERROR: Failed to connect to environment: {e}")
+        # Set 0 score for any remaining tasks
         for task_id in TASKS:
-            task_result = await evaluate_task(client, env, task_id)
-            results["tasks"][task_id] = task_result
+            if task_id not in results["tasks"]:
+                results["tasks"][task_id] = {
+                    "task_id": task_id,
+                    "score": 0.0,
+                    "emails_processed": 0,
+                    "total_reward": 0.0,
+                    "details": [],
+                    "error": str(e),
+                }
     
     # Calculate overall score (average across tasks)
     task_scores = [results["tasks"][t]["score"] for t in TASKS]
