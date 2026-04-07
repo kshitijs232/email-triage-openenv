@@ -15,9 +15,9 @@ RUN apt-get update && apt-get install -y \
 # Copy requirements first for better caching
 COPY requirements.txt .
 
-# Install dependencies
+# Install dependencies with retry logic for network resilience
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir --retries 5 --timeout 60 -r requirements.txt
 
 # Copy the rest of the application
 COPY . .
