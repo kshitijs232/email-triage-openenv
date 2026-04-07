@@ -264,6 +264,9 @@ async def evaluate_task(client: OpenAI, env: EmailTriageEnv, task_id: str) -> di
     print(f"Evaluating Task: {task_id}")
     print(f"{'='*60}")
     
+    # Structured output: START marker
+    print(f"[START] task={task_id}", flush=True)
+    
     # Reset environment for this task
     result = await env.reset(task_id=task_id)
     obs = result.observation
@@ -293,6 +296,9 @@ async def evaluate_task(client: OpenAI, env: EmailTriageEnv, task_id: str) -> di
         total_reward += reward
         print(f"    Reward: {reward:.2f}")
         
+        # Structured output: STEP marker
+        print(f"[STEP] step={step} reward={reward:.4f}", flush=True)
+        
         details.append({
             "email_id": email.id,
             "subject": email.subject[:50],
@@ -311,6 +317,9 @@ async def evaluate_task(client: OpenAI, env: EmailTriageEnv, task_id: str) -> di
     print(f"  Emails Processed: {step}")
     print(f"  Total Reward: {total_reward:.2f}")
     print(f"  Final Score: {final_score:.2%}")
+    
+    # Structured output: END marker
+    print(f"[END] task={task_id} score={final_score:.4f} steps={step}", flush=True)
     
     return {
         "task_id": task_id,
@@ -407,8 +416,10 @@ async def run_evaluation() -> dict:
         await wait_for_server(ENV_URL)
     except ConnectionError as e:
         print(f"ERROR: Could not connect to environment server: {e}")
-        # Return empty results with 0 score
+        # Return empty results with 0 score, with structured output
         for task_id in TASKS:
+            print(f"[START] task={task_id}", flush=True)
+            print(f"[END] task={task_id} score=0.0000 steps=0", flush=True)
             results["tasks"][task_id] = {
                 "task_id": task_id,
                 "score": 0.0,
@@ -428,6 +439,9 @@ async def run_evaluation() -> dict:
                     results["tasks"][task_id] = task_result
                 except Exception as e:
                     print(f"ERROR: Task {task_id} failed: {e}")
+                    # Output structured markers for failed task
+                    print(f"[START] task={task_id}", flush=True)
+                    print(f"[END] task={task_id} score=0.0000 steps=0", flush=True)
                     results["tasks"][task_id] = {
                         "task_id": task_id,
                         "score": 0.0,
@@ -438,9 +452,11 @@ async def run_evaluation() -> dict:
                     }
     except Exception as e:
         print(f"ERROR: Failed to connect to environment: {e}")
-        # Set 0 score for any remaining tasks
+        # Set 0 score for any remaining tasks with structured output
         for task_id in TASKS:
             if task_id not in results["tasks"]:
+                print(f"[START] task={task_id}", flush=True)
+                print(f"[END] task={task_id} score=0.0000 steps=0", flush=True)
                 results["tasks"][task_id] = {
                     "task_id": task_id,
                     "score": 0.0,
