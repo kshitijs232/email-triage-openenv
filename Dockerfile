@@ -1,7 +1,8 @@
 # Dockerfile for Email Triage Environment
 # For HuggingFace Spaces deployment
 
-FROM python:3.11-slim
+# Use specific bookworm tag for more reliable pulls
+FROM python:3.11.9-slim-bookworm
 
 # Set working directory
 WORKDIR /app
